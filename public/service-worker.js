@@ -1,3 +1,5 @@
+const { response } = require("express");
+
 const CACHE_NAME = "budget-tracker";
 const DATA_CACHE_NAME = "budget-tracker-data";
 
@@ -20,4 +22,48 @@ const onInstall = (event) => {
   );
 };
 
+const onFetch = (event) => {
+  if (event.request.url.includes("/api/")) {
+    event.respondWith(
+      caches
+        .open(DATA_CACHE_NAME)
+        .then(function (cache) {
+          const cacheData = fetch(event.request)
+            .then((response) => {
+              if (response.status === 200) {
+                cache.put(event.request.url, response.clone());
+              }
+
+              return response;
+            })
+            .catch((err) => {
+              return cache.match(event.request);
+            });
+
+          return cacheData;
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+    );
+  } else {
+    event.respondWith(
+      fetch(event.request).catch(function () {
+        const cacheData = caches.match(event.request).then(function (response) {
+          if (response) {
+            return response;
+          } else if (
+            event.request.headers.get("accept").includes("text/html")
+          ) {
+            return caches.match("/");
+          }
+        });
+
+        return cacheData;
+      })
+    );
+  }
+};
+
 self.addEventListener("install", onInstall);
+self.addEventListener("fetch", onFetch);
