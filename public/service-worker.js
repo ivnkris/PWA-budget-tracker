@@ -11,16 +11,12 @@ const urlsToCache = [
   "/icons/icon-512x512.png",
 ];
 
-const onInstall = async (event) => {
+const onInstall = (event) => {
   event.waitUntil(
-    await caches.open(CACHE_NAME),
-
-    function openCache(cache) {
+    caches.open(CACHE_NAME).then(function (cache) {
       console.log("Opened cache");
       return cache.addAll(urlsToCache);
-    },
-
-    openCache()
+    })
   );
 };
 
