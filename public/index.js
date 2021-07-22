@@ -2,8 +2,8 @@ if ("serviceWorker" in navigator) {
   const onLoad = async () => {
     await navigator.serviceWorker.register("/service-worker.js");
 
-    const onSuccessfulReg = (reg) => {
-      console.log("Service worker registered", reg);
+    const onSuccessfulReg = () => {
+      console.log("Service worker registered");
     };
 
     onSuccessfulReg();
