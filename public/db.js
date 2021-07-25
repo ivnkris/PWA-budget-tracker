@@ -16,6 +16,7 @@ request.onupgradeneeded = ({ target }) => {
 request.onsuccess = ({ target }) => {
   db = target.result;
 
+  // if app is online, read from database
   if (navigator.onLine) {
     compareData();
   }
@@ -32,6 +33,7 @@ const saveRecord = (record) => {
   objectStore.add(record);
 };
 
+// write to database if item added
 const compareData = () => {
   const transaction = db.transaction(["pending"], "readwrite");
   const store = transaction.objectStore("pending");

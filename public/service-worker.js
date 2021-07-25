@@ -11,6 +11,7 @@ const urlsToCache = [
   "/icons/icon-512x512.png",
 ];
 
+// Install cache into browser
 const onInstall = (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
@@ -21,6 +22,7 @@ const onInstall = (event) => {
 };
 
 const onFetch = (event) => {
+  // cache requests received on API route
   if (event.request.url.includes("/api/")) {
     event.respondWith(
       caches
@@ -28,6 +30,7 @@ const onFetch = (event) => {
         .then(function (cache) {
           const cacheData = fetch(event.request)
             .then((response) => {
+              // clone and store response in cache if status code is 200
               if (response.status === 200) {
                 cache.put(event.request.url, response.clone());
               }
@@ -53,6 +56,7 @@ const onFetch = (event) => {
           } else if (
             event.request.headers.get("accept").includes("text/html")
           ) {
+            // return cached homepage for view routes
             return caches.match("/");
           }
         });
