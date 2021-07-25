@@ -34,37 +34,30 @@ const saveRecord = (record) => {
 
 const compareData = () => {
   const transaction = db.transaction(["pending"], "readwrite");
-  const objectStore = transaction.objectStore("pending");
-  const getAll = objectStore.getAll();
+  const store = transaction.objectStore("pending");
+  const getAll = store.getAll();
 
-  const writeToDB = async () => {
-    const options = {
-      method: "POST",
-      body: JSON.stringify(getAll.result),
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-      },
-    };
-
-    const response = await fetch("/api/transaction/bulk", options);
-
-    const dataJSON = (response) => {
-      return response.json();
-    };
-
-    objectStore.clear();
-
-    return dataJSON;
-  };
-
-  const onSuccess = () => {
+  getAll.onsuccess = function () {
     if (getAll.result.length > 0) {
-      writeToDB();
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then(() => {
+          // delete records if successful
+          const transaction = db.transaction(["pending"], "readwrite");
+          const store = transaction.objectStore("pending");
+          store.clear();
+        });
     }
   };
-
-  getAll.onsuccess = onSuccess();
 };
 
 window.addEventListener("online", compareData);
